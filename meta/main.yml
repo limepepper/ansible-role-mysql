@@ -1,15 +1,12 @@
 ---
 
 galaxy_info:
-  role_name: mysql
+  role_name: limepepper.mysql
   author: Tom Hodder
   description: Install and configure mysql
-  company: Lime Pepper Ltd
+  company: "Lime Pepper Ltd"
 
-  # issue_tracker_url: http://example.com/issue/tracker
-
-  license: license (MIT)
-
+  license: "license (MIT)"
   min_ansible_version: 2.5
 
   # min_ansible_container_version:
