@@ -14,6 +14,7 @@
   - set_fact:
       rprofile: "{{ mysql_profile }}"
     when: mysql_profile is defined
+    tags: always
 
   - include_tasks: bootstrap/distro-vars-import-profile.yml
     tags: always
@@ -25,6 +26,9 @@
       mysql_root_password: "{{ lookup('complex_password',
       '{{ store_path }}/{{ ansible_hostname }}/mysql/root_pass length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
     when: mysql_root_password is not defined
+    # if the password was generated, we will need to restart mysql service
+    # immediately to force mysql to pick it up
+    register: mysql_root_password_generated
     tags: always
 
   - name: generate a complex password for ansible_dba
@@ -32,11 +36,6 @@
       mysql_dba_password: "{{ lookup('complex_password',
       '{{ store_path }}/{{ ansible_hostname }}/mysql/mysql_dba_password length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
     when: mysql_dba_password is not defined
-    tags: always
-
-  - name: need to persist the mysql_dba_user value for tests
-    set_fact:
-      mysql_dba_user: "{{ mysql_dba_user }}"
     tags: always
 
   - name: need to persist the mysql_dba_user value for tests

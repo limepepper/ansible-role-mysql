@@ -1,0 +1,159 @@
+---
+driver:
+  name: vagrant
+
+transport:
+  max_ssh_sessions: 5
+
+provisioner:
+  name: ansible_push
+  playbook: tests/test.yml
+  chef_bootstrap_url: nil
+  # ansible_config      : "/path/to/ansible/ansible.cfg"
+  verbose: "<%= ENV.key?('ANSIBLE_Vs') ? ENV['ANSIBLE_Vs'] : 'vv' %>"
+  tags: <%= ENV['ANSIBLE_TAGS'] %>
+  skip_tags: <%= ENV['ANSIBLE_SKIP_TAGS'] %>
+  extra_vars:
+    ara_enabled: true
+    mysql_running_baseline: false
+
+platforms:
+  # - name: ubuntu-17.10
+  - name: ubuntu-16.04
+  # - name: ubuntu-14.04
+  - name: centos-7
+  - name: centos-6
+  - name: fedora-27
+  # - name: oracle-7.4
+  # - name: oracle-6.9
+  # - name: debian-8
+  - name: debian-9
+
+# kitchen-inspec expects test to be in test/integration/%suite%/inspec
+verifier:
+  name: inspec
+  sudo: true
+  # sudo_command: sudo -i -E
+  # sudo_options: -i -E
+  format: documentation
+  inspec_tests:
+    - tests/integration/inspec
+    # - https://github.com/dev-sec/mysql-baseline
+  attributes:
+    # Password: A3C1ef13^N9fef
+    skiplist:
+      - mysql-skip-this
+  # skiplist:
+  # format: junit
+  # output: reports/inspec/junit/<%= Time.now.strftime("%Y_%m_%d") %>/%{platform}_%{suite}_<%= Time.now.strftime("%H_%M_%S") %>_inspec.xml
+  # format: json
+  # output: reports/inspec/json/%{platform}_%{suite}_<%= Time.now.strftime("%Y_%m_%d_T_%H_%M_%S") %>_inspec.json
+  #reporter: junit:./reports/inspec/junit/%{platform}_%{suite}_<%= Time.now.strftime("%Y_%m_%d_T_%H_%M_%S") %>_inspec.xml
+
+suites:
+  - name: default
+    provisioner:
+      extra_vars:
+        test_suite: mysql-stock
+  - name: stock
+    description: |
+      whatever version the distro provides by default. Will skip versioning tests
+    provisioner:
+      extra_vars:
+        test_suite: mysql-stock
+        mysql_profile: stock
+    # verifier:
+    #   attributes:
+    #     skiplist:
+    #       - mysql-versioning-1
+  - name: mysql-51
+    excludes:
+      - centos-7
+      - fedora-27
+    #  - ubuntu-16.04
+    provisioner:
+      extra_vars:
+        test_suite: mysql-51
+        mysql_profile: mysql_server_5_1
+    verifier:
+      inspec_tests:
+        - tests/integration/inspec
+        - https://github.com/dev-sec/mysql-baseline
+  - name: mysql-55
+    excludes:
+      - centos-7
+      - fedora-27
+    provisioner:
+      extra_vars:
+        test_suite: mysql-55
+        mysql_profile: mysql_server_5_5
+  - name: mysql-56
+    excludes:
+      - centos-7
+      - fedora-27
+    provisioner:
+      extra_vars:
+        test_suite: mysql-56
+        mysql_profile: mysql_server_5_6
+  - name: mysql-community-56
+    provisioner:
+      extra_vars:
+        test_suite: mysql-community-56
+        mysql_profile: mysql_community_server_5_6
+  - name: mysql-57
+    excludes:
+      - centos-7
+      - fedora-27
+    provisioner:
+      extra_vars:
+        test_suite: mysql-57
+        mysql_profile: mysql_server_5_7
+  - name: mysql-community-57
+    provisioner:
+      extra_vars:
+        test_suite: mysql-community-57
+        mysql_profile: mysql_community_server_5_7
+  - name: mysql-80
+    provisioner:
+      extra_vars:
+        test_suite: mysql-80
+        mysql_profile: mysql_community_server_8_0
+  - name: mariadb-100
+    provisioner:
+      extra_vars:
+        test_suite: mariadb-100
+        mysql_profile:  mariadb-10_0
+  - name: mariadb-55
+    provisioner:
+      extra_vars:
+        test_suite: mariadb-55
+        mysql_profile:  maria_5_5
+  - name: mariadb-101
+    provisioner:
+      extra_vars:
+        test_suite: mariadb-101
+        mysql_profile: maria_10_1
+  - name: mariadb-102
+    provisioner:
+      extra_vars:
+        test_suite: mariadb-102
+        mysql_profile: maria_10_2
+  - name: mariadb-103
+    provisioner:
+      extra_vars:
+        test_suite: mariadb-103
+        mysql_profile: maria_10_3
+  # - name: test-merge
+  #   provisioner:
+  #     playbook: tests/test2.yml
+
+
+  # - name: mysql_login_tests
+  #   provisioner:
+  #     playbook: tests/mysql_login_tests.yml
+  #     extra_vars:
+  #       test_suite: mysql_login_tests
+  #       mysql_profile: mysql_community_server_5_7
+  #   verifier:
+  #     inspec_tests:
+  #       - tests/integration/inspec/mysql_login_tests

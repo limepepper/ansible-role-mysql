@@ -1,9 +1,13 @@
 
-Role Name
+LimePepper MySQL Ansible Role
 =========
 
 The purpose of this role is to install and start a mysql compatible database
-service, and to secure the installation on any of the major linux distros.
+service, and to secure the installation, and make the service available to other
+roles requiring a mysql compatible database.
+
+The role is compatible with any of the major current linux distros. See the
+testing section for details.
 
 The role supports variables to control which package and version of mysql/maria
 is installed, and allows over riding of generated passwords, ports etc.
@@ -31,6 +35,12 @@ A basic playbook looks like this.
   - import_role:
       name: limepepper.mysql
 ~~~
+
+By default, if no `mysql_root_password` variable is provided, the role will
+generate a 15 character complex password, and write it out into a file called
+`~/.local/share/ansible/store/limepepper.mysql/{{ inventory_hostname }}/mysql_root_password`
+
+
 
 ## Install a specific package and version
 
