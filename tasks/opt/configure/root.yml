@@ -1,0 +1,14 @@
+---
+
+- become: yes
+  tags: [ mysql ]
+  block:
+
+  - name: ensure .my.cnf file with root password credentials is installed
+    template:
+      src: configs/client.cnf
+      dest: /root/.my.cnf
+      owner: root
+      group: root
+      mode: 0600
+    when: "mysql_root_auth_method == 'mysql_native_password'"
