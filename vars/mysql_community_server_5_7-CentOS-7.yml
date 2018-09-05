@@ -1,12 +1,7 @@
 ---
 
-
 com_repo_ver: 11
 
-mysql_packages:
-  - MySQL-python
-  - mysql
-  - mysql-server
 mysql_service_name: mysqld
 mysql_root_auth_method: mysql_native_password
 mysql_mysqld_binary: /usr/libexec/mysqld
@@ -27,3 +22,8 @@ mysql_requested_version: 5.7
 mysql_service_alias: false
 mysql_fork: community
 mysql_includedir: true
+
+mysql_packages:
+  - MySQL-python
+  - mysql
+  - mysql-server

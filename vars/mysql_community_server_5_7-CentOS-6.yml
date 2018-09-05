@@ -2,17 +2,6 @@
 
 com_repo_ver: 11
 
-mysql_packages:
-  - python-pip
-  - libselinux-python
-  - mysql-community-client-5.7*
-  - mysql-community-server-5.7*
-  # - MySQL-python
-  - mysql-community-devel-5.7*
-  - mysql-utilities
-  - python-devel
-  # required to build MySQL-python==1.2.5
-  - gcc
 mysql_service_name: mysqld
 mysql_root_auth_method: mysql_native_password
 mysql_mysqld_binary: /usr/libexec/mysqld
@@ -34,3 +23,15 @@ mysql_service_alias: false
 mysql_fork: community
 mysql_includedir: true
 pid_file: /var/run/mysqld/mysqld.pid
+
+mysql_packages:
+  - python-pip
+  - libselinux-python
+  - mysql-community-client-5.7*
+  - mysql-community-server-5.7*
+  # - MySQL-python
+  - mysql-community-devel-5.7*
+  - mysql-utilities
+  - python-devel
+  # required to build MySQL-python==1.2.5
+  - gcc

@@ -16,20 +16,33 @@
 
     ## START OF MAIN TASKS SECTION ##
 
+  - debug:
+      var: mysql_root_password
+
+  - debug:
+      msg: |
+        {{ store_path }}/{{ inventory_hostname }}/mysql/root_pass
+        {{ mysql_root_password | default('not defined') }}
+
   - name: generate a complex password for root
     set_fact:
       mysql_root_password: "{{ lookup('complex_password',
-      '{{ store_path }}/{{ ansible_hostname }}/mysql/root_pass length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
+      '{{ store_path }}/{{ inventory_hostname }}/mysql/root_pass length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
     when: mysql_root_password is not defined
     # if the password was generated, we will need to restart mysql service
     # immediately to force mysql to pick it up
     register: mysql_root_password_generated
     tags: always
 
+  - debug:
+      msg: |
+        {{ store_path }}/{{ inventory_hostname }}/mysql/root_pass
+        {{ lookup('file', store_path + '/' + inventory_hostname + '/mysql/root_pass') }}
+
   - name: generate a complex password for ansible_dba
     set_fact:
       mysql_dba_password: "{{ lookup('complex_password',
-      '{{ store_path }}/{{ ansible_hostname }}/mysql/mysql_dba_password length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
+      '{{ store_path }}/{{ inventory_hostname }}/mysql/mysql_dba_password length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
     when: mysql_dba_password is not defined
     tags: always
 

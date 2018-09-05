@@ -27,7 +27,7 @@ log_queries_not_using_indexes = 1
 
 {% if mysql_bin_log %}
 server-id = 7
-log-bin = {{ ansible_hostname }}
+log-bin = {{ inventory_hostname }}
 {% endif %}
 
 {% if mysql_requested_version|version_compare('5.7.4', '>=', strict=True) %}
