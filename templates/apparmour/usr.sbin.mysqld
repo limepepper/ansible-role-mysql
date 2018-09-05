@@ -1,0 +1,9 @@
+#
+#
+
+# /usr/sbin/mysqld {
+  /proc/*/status r,
+  /sys/devices/system/node/ r,
+  /sys/devices/system/node/** r,
+# }
+
