@@ -5,7 +5,7 @@
   pre_tasks:
     - name: bootstrap-block
       # description: bootstrap hosts with base builds not including python 2.7
-      become: True
+      become: true
       tags: [ bootstrap, pre_tasks, install-python ]
       block:
         - name: Install python2 for Ansible
@@ -42,10 +42,6 @@
       # troubleshooing tools to the build.
       rescue:
 
-        - include_role:
-            name: '{{playbook_dir}}/..'
-            tasks_from: bootstrap/distro-debug-packages.yml
+        - include_tasks: ../tasks/bootstrap/distro-debug-packages.yml
           tags: always
 
-        - fail:
-            msg: "force a failure due to previous errors"

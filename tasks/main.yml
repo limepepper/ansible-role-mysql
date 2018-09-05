@@ -11,12 +11,7 @@
     tags: [ bootstrap ]
 
     # boilerplate
-  - set_fact:
-      rprofile: "{{ mysql_profile }}"
-    when: mysql_profile is defined
-    tags: always
-
-  - include_tasks: bootstrap/distro-vars-import-profile.yml
+  - include_tasks: bootstrap/distro-vars-import-profile2.yml
     tags: always
 
     ## START OF MAIN TASKS SECTION ##
@@ -54,23 +49,8 @@
     when: mysql_install
     tags: always
 
-  # - set_fact:
-  #     limepepper_mysql:
-  #       logfiles:
-  #         limepepper.mysql:
-  #           files: "{{ mysql_profiles[mysql_profile]['log_files'] }}"
-  #   tags: always
-
   - debug:
       var: limepepper_mysql
 
     ## END OF MAIN TASKS SECTION ##
 
-  # boilerplate
-  # the idea here, is that if any of the tasks fail, it will add useful
-  # troubleshooing tools to the build.
-  rescue:
-  - include_tasks: bootstrap/distro-debug-packages.yml
-
-  - fail:
-      msg: "force a failure due to previous errors"

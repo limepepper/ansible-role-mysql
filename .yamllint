@@ -1,5 +1,10 @@
 extends: default
 
+ignore: |
+  .venv/
+  .kitchen/
+  molecule/
+
 rules:
   braces:
     max-spaces-inside: 1
@@ -11,3 +16,7 @@ rules:
   # NOTE(retr0h): Templates no longer fail this lint rule.
   #               Uncomment if running old Molecule templates.
   # truthy: disable
+  key-duplicates: enable
+  new-line-at-end-of-file: enable
+  new-lines: {type: unix}
+  truthy: disable

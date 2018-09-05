@@ -1,11 +1,17 @@
 ---
-AllCops:
-  TargetRubyVersion: 2.3
+
 Bundler/DuplicatedGem:
   Exclude:
     - 'Gemfile'
 Style/GlobalVars:
   Exclude:
-    - 'vagrant/vagrant.rb'
+    - '.vagrant/vagrant.rb'
+Style/SafeNavigation:
+  Exclude:
+    - 'test/integration/**/*'
+Metrics/LineLength:
+  Exclude:
+    - 'test/integration/**/*'
 Metrics/BlockLength:
-  Max: 50
+  Exclude:
+    - 'test/integration/**/*'

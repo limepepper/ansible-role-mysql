@@ -17,6 +17,7 @@ galaxy_info:
 
   # https://galaxy.ansible.com/api/v1/platforms/?name=Fedora
   # https://galaxy.ansible.com/api/v1/platforms/?page=2
+
   platforms:
     - name: Ubuntu
       versions:
@@ -41,5 +42,5 @@ galaxy_info:
     - mysql
 
 dependencies: []
-  # - src: git+https://github.com/limepepper/ansible-role-apache.git
-  # - src: git+https://github.com/limepepper/ansible-role-mysql.git
+# - src: git+https://github.com/limepepper/ansible-role-apache.git
+# - src: git+https://github.com/limepepper/ansible-role-mysql.git
