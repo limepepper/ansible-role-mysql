@@ -1,0 +1,5 @@
+---
+
+# default version to install, current GA release
+rprofile: mysql_community_server_5_7
+# mysql_profile: maria_5_5

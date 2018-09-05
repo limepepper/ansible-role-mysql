@@ -1,0 +1,26 @@
+---
+
+
+mysql_packages:
+  - mariadb
+  - mariadb-server
+  - MySQL-python
+  - mariadb-devel
+mysql_service_name: mariadb
+mysql_root_auth_method: mysql_native_password
+mysql_log_dir: /var/log/mariadb
+mysql_log_file: /var/log/mariadb/mariadb.log
+mysql_log_files:
+  - /var/log/mariadb/mariadb.log
+  # - /var/log/mysql/slow.log
+mysql_config_file: /etc/my.cnf
+mysql_config_dir: /etc/mysql
+mysql_data_dir: /var/lib/mysql
+mysql_alt_config_file: /etc/mysql/my.cnf
+mysql_mysqld_binary: /usr/libexec/mysqld
+mysql_config_dropin: /etc/my.cnf.d
+mysql_requested_version: 5.5
+mysql_service_alias: false
+mysql_fork: maria
+mysql_includedir: false
+mysql_pid_file: /var/run/mysqld/mysqld.pid

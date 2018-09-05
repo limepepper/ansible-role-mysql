@@ -1,0 +1,6 @@
+---
+
+# default version to install, current GA release
+rprofile: mysql_community_server_5_7
+# fedora alsa has mariadb-10.2.17-1.fc28.src.rpm
+# mysql_profile: maria_10_2

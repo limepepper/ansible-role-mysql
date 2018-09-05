@@ -1,0 +1,75 @@
+---
+
+# mysql_python_package: python-mysqldb
+# mysql_base_package: mysql-client
+# mysql_server_package: mysql-server
+
+mysql_profile: maria_server_10_1
+mysql_root_user: root
+com_repo_ver: 11
+
+mysql_db_name: mysql
+
+mysql_config_path: /etc/mysql
+mysql_config_file: my.cnf
+mysql_data_path: /var/lib/mysql
+mysql_log_pathP: /var/log
+mysql_log_file: mysql.log
+mysql_log_group: adm
+
+mysql_remove_validate_password_plugin: true
+
+mysql_profiles:
+  maria_server_10_1:
+    description: Debian-9 stock mysql is maria 10.1...
+    packages:
+      - python-pip
+      - python-mysqldb
+      - mariadb-server-10.1
+    service_name: mariadb.service
+    root_auth_method: mysql_native_password
+    mysqld_binary: /usr/libexec/mysqld
+    config_dropin: /etc/mysql/mariadb.conf.d
+    config_file: /etc/mysql/mariadb.conf.d/50-server.cnf
+    config_dir: /etc/mysql
+  #  alt_config_file: /etc/mysql/my.cnf
+    log_dir: /var/log/mysql
+    log_file: /var/log/mysqld.log
+    requested_version: 10.1
+    fork: mysql
+
+  stock:
+    packages:
+      - python-pip
+      - python-mysqldb
+      - mariadb-server-10.1
+    service_name: mariadb.service
+    root_auth_method: mysql_native_password
+    mysqld_binary: /usr/libexec/mysqld
+    config_dropin: /etc/mysql/mariadb.conf.d
+    config_file: /etc/mysql/mariadb.conf.d/50-server.cnf
+    config_dir: /etc/mysql
+  #  alt_config_file: /etc/mysql/my.cnf
+    log_dir: /var/log/mysql
+    log_file: /var/log/mysqld.log
+    requested_version: 10.1
+    fork: mysql
+
+  maria_server_10_2:
+    packages:
+      - mariadb-server-10.2
+      - python-mysqldb
+    service_name: mariadb
+    root_auth_method: mysql_native_password
+    log_dir: /var/log/mariadb
+    log_file: /var/log/mariadb/mariadb.log
+    config_file: /etc/my.cnf
+    config_dir: /etc/mysql
+    alt_config_file: /etc/mysql/my.cnf
+    mysqld_binary: /usr/libexec/mysqld
+    config_dropin: /etc/my.cnf.d
+    requested_version: 10.2
+    fork: maria
+
+limepepper.mysql:
+  logfiles: {}

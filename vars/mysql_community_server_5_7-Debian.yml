@@ -1,0 +1,61 @@
+---
+
+
+com_repo_ver: 11
+
+mysql_requested_version: 5.7
+
+mysql_remove_validate_password_plugin: true
+mysql_install_troubleshooting_tools: true
+
+# mysql_apt_repo: >
+#     deb [arch=amd64,arm64,i386,ppc64el]
+#     http://ams2.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu xenial main
+
+mysql_root_user: root
+mysql_packages:
+  - python-mysqldb
+  # - mysql
+  - mysql-server-5.7
+mysql_service_name: mysql
+mysql_root_auth_method: mysql_native_password
+mysql_log_dir: /var/log/mysql
+mysql_log_file: /var/log/mysqld.log
+mysql_config_file: /etc/my.cnf
+mysql_config_dir: /etc/mysql
+mysql_alt_config_file: /etc/mysql/my.cnf
+mysql_mysqld_binary: /usr/sbin/mysqld
+mysql_config_dropin: /etc/mysql/conf.d
+mysql_fork: community
+
+mysql_db_name: mysql
+mysql_config_path: /etc/mysql
+mysql_data_path: /var/lib/mysql
+mysql_log_pathP: /var/log
+mysql_log_group: adm
+
+
+# mysql_packages:
+#   - MySQL-python
+#   - mysql
+#   - mysql-server
+# mysql_service_name: mysqld
+# mysql_root_auth_method: mysql_native_password
+# mysql_mysqld_binary: /usr/libexec/mysqld
+# mysql_external_repo: https://dev.mysql.com/get/mysql57-community-release-el7-{{ com_repo_ver }}.noarch.rpm
+# #https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
+# mysql_config_dir: /etc/mysql
+# mysql_config_file: /etc/my.cnf
+# mysql_data_dir: /var/lib/mysql
+# mysql_alt_config_file: /etc/mysql/my.cnf
+# mysql_log_dir: /var/log/mysql
+# mysql_log_file: /var/log/mysqld.log
+# mysql_log_files:
+#   - path: /var/log/mysqld.log
+#     tag: mysql_server
+#   # - /var/log/mysql/slow.log
+# mysql_config_dropin: /etc/my.cnf.d
+# mysql_requested_version: 5.7
+# mysql_service_alias: false
+# mysql_fork: community
+# mysql_includedir: true

@@ -1,0 +1,33 @@
+---
+
+mysql_requested_version: 10.3
+
+mysql_remove_validate_password_plugin: true
+mysql_install_troubleshooting_tools: true
+
+mysql_apt_repo: >
+    deb [arch=amd64,arm64,i386,ppc64el]
+    http://ams2.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu xenial main
+
+mysql_root_user: root
+mysql_packages:
+  - mariadb-server-10.3
+  - python-mysqldb
+mysql_service_name: mariadb
+mysql_root_auth_method: mysql_native_password
+mysql_log_dir: /var/log/mariadb
+mysql_log_file: /var/log/mariadb/mariadb.log
+mysql_config_file: /etc/my.cnf
+mysql_config_dir: /etc/mysql
+mysql_alt_config_file: /etc/mysql/my.cnf
+mysql_mysqld_binary: /usr/libexec/mysqld
+mysql_config_dropin: /etc/mysql/conf.d
+mysql_fork: maria
+
+mysql_db_name: mysql
+mysql_config_path: /etc/mysql
+# mysql_config_file: my.cnf
+mysql_data_path: /var/lib/mysql
+mysql_log_pathP: /var/log
+# mysql_log_file: mysql.log
+mysql_log_group: adm
