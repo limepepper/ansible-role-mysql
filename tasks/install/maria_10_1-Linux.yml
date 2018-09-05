@@ -1,0 +1,42 @@
+---
+
+- become: yes
+  tags: [ maria, mysql, ubuntu ]
+  block:
+
+  - include_tasks: trouble-tools.yml
+
+
+
+    # Ubuntu packagers seem to start the service upon installation...
+    # so this happens after installing the config files
+  - name: install mysql_package
+    package:
+      name: "{{ mysql_packages }}"
+    register: mysql_package_installed
+    tags:
+        - packages
+
+  - name: generate the init.sql which runs on every server start
+    template:
+      src: "configs/init_sql-maria-10-1.sql"
+      dest: "{{ mysql_config_dir }}/init_sql.sql"
+      owner: root
+      group: root
+      mode: 0664
+    when: mysql_handle_setup_with_init_sql
+    tags: [ config ]
+    register: init_sql_updated
+    notify:
+      - restart mysql
+
+  - name: config stuff
+    template:
+      src: configs/mariadb-10-1.cnf
+      dest: "{{ mysql_config_dropin }}/mariadb-10-1.cnf"
+      owner: root
+      group: root
+      mode: 0664
+    tags: [ config ]
+    notify:
+      - restart mysql

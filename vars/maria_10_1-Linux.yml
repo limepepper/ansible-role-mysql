@@ -1,0 +1,20 @@
+---
+
+
+
+
+mysql_packages:
+  - python-pip
+  - python-mysqldb
+  - mariadb-server-10.1
+mysql_service_name: mariadb.service
+mysql_root_auth_method: mysql_native_password
+mysql_mysqld_binary: /usr/libexec/mysqld
+mysql_config_dropin: /etc/mysql/mariadb.conf.d
+mysql_config_file: /etc/mysql/mariadb.conf.d/50-server.cnf
+mysql_config_dir: /etc/mysql
+#  mysql_alt_config_file: /etc/mysql/my.cnf
+mysql_log_dir: /var/log/mysql
+mysql_log_file: /var/log/mysqld.log
+mysql_requested_version: 10.1
+mysql_fork: maria

@@ -15,7 +15,7 @@
         - "{{ rprofile }}-{{ ansible_distribution }}-{{ ansible_distribution_major_version}}.yml"
         - "{{ rprofile }}-{{ ansible_distribution }}.yml"
         - "{{ rprofile }}-{{ ansible_os_family }}.yml"
-        # - "{{ rprofile }}-{{ ansible_system }}.yml"
+        - "{{ rprofile }}-{{ ansible_system }}.yml"
         - "{{ ansible_distribution }}-{{ ansible_distribution_version}}.yml"
         - "{{ ansible_distribution }}-{{ ansible_distribution_major_version}}.yml"
         - "{{ ansible_distribution }}.yml"
