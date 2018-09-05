@@ -1,0 +1,69 @@
+#
+#
+#
+#
+[mysqld]
+
+{% if mysql_requested_version|version_compare('5.5', '<', strict=True) %}
+bind-address = "{{ mysql_mysql_bind_address|default('127.0.0.1') }}"
+{% else %}
+bind-address = "{{ mysql_bind_address }}"
+{% endif %}
+
+{% if mysql_general_log %}
+general_log = on
+general_log_file="{{ mysql_log_dir }}/mysql.general.log"
+{% endif %}
+
+{% if mysql_slow_query_log %}
+slow_query_log = 1
+slow_query_log_file = "{{ mysql_log_dir }}/slow.log"
+long_query_time = 6
+{% endif %}
+
+{% if mysql_log_no_indexes %}
+log_queries_not_using_indexes = 1
+{% endif %}
+
+{% if mysql_bin_log %}
+server-id = 7
+log-bin = {{ ansible_hostname }}
+{% endif %}
+
+{% if mysql_requested_version|version_compare('5.7.4', '>=', strict=True) %}
+default_password_lifetime=0
+{% endif %}
+{% if mysql_root_auth_method == 'auth_socket' %}
+{% if mysql_requested_version|version_compare('5.6.3', '>=', strict=True) %}
+plugin-load-add=auth_socket.so
+#plugin-load-add=validate_password.so
+{% else %}
+plugin-load=auth_socket.so
+{% endif %}
+{% endif %}
+
+{% if mysql_safe_user_create %}
+safe-user-create = 1
+{% endif %}
+
+{% if mysql_requested_version|version_compare('8.0', '<', strict=True) %}
+{% if mysql_secure_auth %}
+secure-auth = 1
+{% endif %}
+{% endif %}
+
+init_file={{ mysql_config_dir}}/init_sql.sql
+
+{#
+# need to set server id to make replication work
+### server-id
+
+# Mysql reads these files, so this file is dropped into the 2nd slot
+# /etc/mysql/my.cnf  which is usually not used in stock installs
+
+# Default options are read from the following files in the given order:
+# /etc/my.cnf
+# /etc/mysql/my.cnf
+# /usr/etc/my.cnf
+# ~/.my.cnf
+#}

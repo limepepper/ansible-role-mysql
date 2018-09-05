@@ -1,0 +1,23 @@
+---
+
+- name: restart mysql
+  service: name={{ mysql_service_name }} state=restarted
+  become: yes
+
+- name: restart monit
+  service:
+    name: monit
+    state: restarted
+  become: yes
+
+# - name: restart upstart monit
+#   service:
+#     name: monit
+#     state: restarted
+#     enabled: yes
+
+- name: restart apparmor
+  service:
+    name: apparmor
+    state: restarted
+  become: yes

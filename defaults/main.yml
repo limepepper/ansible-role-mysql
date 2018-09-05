@@ -1,0 +1,46 @@
+---
+# defaults file for mysql-local
+
+rprofile: stock
+
+store_path: '~/.local/share/ansible/store'
+
+mysql_sql_mode: STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+
+mysql_port: 3306
+mysql_bind_address: "::ffff:127.0.0.1"
+
+mysql_install_troubleshooting_tools: false
+mysql_plugin_validate_password_policy: LOW
+
+mysql_user: mysql
+mysql_group: mysql
+
+mysql_handle_setup_with_init_sql: true
+mysql_remove_nouser_accounts: true
+mysql_remove_test_databases: true
+mysql_remove_validate_password_plugin: false
+mysql_remove_socket_plugin: false
+
+# logging settings
+# mysql_general_log: false
+mysql_general_log: true
+# mysql_bin_log: false
+mysql_bin_log: true
+mysql_slow_query_log: true
+mysql_log_no_indexes: false
+
+mysql_dba_account: true
+mysql_dba_user: ansible_dba
+
+mysql_install: true
+mysql_running_baseline: false
+mysql_safe_user_create: false
+mysql_secure_auth: true
+mysql_skip_symbolic_links: true
+mysql_secure_file_priv: true
+
+mysql_opts: []
+
+logfiles: []
+mysql_external_repo: []

@@ -1,0 +1,14 @@
+#
+#
+#
+#
+[mysqld]
+
+# the init sql file contains a root password reset
+init_file={{ mysql_config_dir }}/init_sql.sql
+
+{% if mysql_requested_version|version_compare('5.5', '<', strict=True) %}
+bind-address = "{{ mysql_mysql_bind_address|default('127.0.0.1') }}"
+{% else %}
+bind-address = "{{ mysql_bind_address }}"
+{% endif %}
