@@ -1,0 +1,41 @@
+#!/bin/bash
+
+{% if ansible_service_mgr == 'systemd' %}
+systemctl stop {{ mysql_service_name }}
+systemctl disable {{ mysql_service_name }}
+{% else %}
+sudo service {{ mysql_service_name }} stop
+{% endif %}
+
+
+{% if ansible_pkg_mgr == 'yum' %}
+sudo yum remove -y mysql-* {% for package in mysql_packages %} {{ package }} {% endfor %}
+{% elif ansible_pkg_mgr == 'apt' %}
+## deb styff here
+apt purge -y $(dpkg-query -f '${binary:Package}\n' -W | grep maria)
+apt purge -y {% for package in mysql_packages %} {{ package }} {% endfor %}
+{% else %}
+## is something else
+{% endif %}
+
+
+sudo rm -rf /var/lib/mysql
+sudo rm -rf /var/log/mysql*
+
+sudo rm -rf /var/lib/maria
+sudo rm -rf /var/log/maria*
+
+{% if mysql_alt_root is defined %}
+sudo rm -rf {{ mysql_alt_root }}/var/lib/mysql
+sudo rm -rf {{ mysql_alt_root }}/var/log/mysql*
+{% endif %}
+
+for foo in mysql mysqladmin mysql_config; do
+  [ -L /bin/${foo} ] && rm -f /bin/{foo}
+done
+
+{% if ansible_service_mgr == 'systemd' %}
+systemctl daemon-reload
+{% else %}
+## is something else
+{% endif %}

@@ -1,0 +1,179 @@
+#!/bin/env python
+
+
+import os
+import sys
+import subprocess
+import datetime
+import re
+
+import MySQLdb
+import MySQLdb.cursors
+
+
+def main():
+
+    cursor = None
+
+    db = MySQLdb.connect(
+        read_default_group="client",
+        cursorclass=MySQLdb.cursors.DictCursor
+        )
+    cursor = db.cursor()
+
+    cursor.execute("""
+        SELECT
+    information_schema.COLUMNS.TABLE_SCHEMA,
+    information_schema.COLUMNS.TABLE_NAME,
+    information_schema.COLUMNS.COLUMN_NAME,
+    information_schema.COLUMNS.ORDINAL_POSITION,
+    information_schema.COLUMNS.COLUMN_TYPE
+FROM
+    information_schema.COLUMNS
+WHERE
+    information_schema.COLUMNS.TABLE_SCHEMA = 'zabbix' ;
+    """)
+
+    init_dict = cursor.fetchall()
+   # print(repr(init_dict))
+
+    cursor.execute("SHOW BINARY LOGS;")
+    bin_logs_dict = cursor.fetchall()
+
+    print(repr(bin_logs_dict))
+
+    binary_logs = ['/var/lib/mysql/' + x['Log_name'] for x in bin_logs_dict]
+    print(repr(binary_logs))
+
+    cursor.execute("SELECT @@GLOBAL.log_bin_basename")
+    log_bin_basename = cursor.fetchone()['@@GLOBAL.log_bin_basename']
+    print(repr(log_bin_basename))
+
+    starttime = (datetime.datetime.now() -
+                 datetime.timedelta(minutes=3)).strftime("%Y-%m-%d %H:%M:%S")
+    endtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    print("start: {0} end: {1}".format(
+        starttime,
+        endtime
+    ))
+
+    print(repr(log_bin_basename))
+
+    mysqlbinlog_out = subprocess.check_output(
+        "/bin/mysqlbinlog  --base64-output=decode-rows -vv  --start-datetime=\"{0}\" --stop-datetime=\"{1}\" {2} |  egrep '^###' | sed 's/^### //' ".format(
+            starttime,
+            endtime,
+            " ".join(binary_logs)
+        ), shell=True, stderr=subprocess.STDOUT)
+    print(mysqlbinlog_out)
+
+    mysqlbinlog_out = mysqlbinlog_out.splitlines()
+    print(mysqlbinlog_out)
+
+    queries = []
+    current_query = {}
+
+    for idx in range(len(mysqlbinlog_out)):
+        line = mysqlbinlog_out[idx]
+
+        if mysqlbinlog_out[line].startswith('INSERT'):
+            queries.append(current_query)
+            current_query = {}
+            current_query['lines'] = [line]
+            current_query['type'] = 'INSERT'
+
+            # if not insertMatchObj:
+            insertMatchObj = re.match(
+                r'INSERT INTO `(.*?)`.`(.*?)`', line, re.I)
+
+            if insertMatchObj:
+              print "matchObj.group() : ", insertMatchObj.group()
+              print "matchObj.group(1) : ", insertMatchObj.group(1)
+              print "matchObj.group(2) : ", insertMatchObj.group(2)
+            else:
+              print "No match!!"
+
+            # example INSERT query
+            # INSERT INTO `zabbix`.`history`
+            # SET
+            #   @1 = 23265 / * LONGINT meta = 0 nullable = 0 is_null = 0 * /
+            #   @2 = 1521647685 / * INT meta = 0 nullable = 0 is_null = 0 * /
+            #   @3 = 0 / * DOUBLE meta = 8 nullable = 0 is_null = 0 * /
+            #   @4 = 207811508 / * INT meta = 0 nullable = 0 is_null = 0 * /
+
+        elif line.startswith('UPDATE'):
+
+            # example UPDATE query
+            # UPDATE `zabbix`.`sessions`
+            # WHERE
+            #   @1 = '1dc93123f47311fd2113e7697ea00a61' / * VARSTRING(96) meta = 96 nullable = 0 is_null = 0 * /
+            #   @2 = 1 / * LONGINT meta = 0 nullable = 0 is_null = 0 * /
+            #   @3 = 1521647756 / * INT meta = 0 nullable = 0 is_null = 0 * /
+            #   @4 = 0 / * INT meta = 0 nullable = 0 is_null = 0 * /
+            # SET
+            #   @1 = '1dc93123f47311fd2113e7697ea00a61' / * VARSTRING(96) meta = 96 nullable = 0 is_null = 0 * /
+            #   @2 = 1 / * LONGINT meta = 0 nullable = 0 is_null = 0 * /
+            #   @3 = 1521647767 / * INT meta = 0 nullable = 0 is_null = 0 * /
+            #   @4 = 0 / * INT meta = 0 nullable = 0 is_null = 0 * /
+
+            queries.append(current_query)
+            current_query = [line]
+        # elif mysqlbinlog_out[line].startswith('REPLACE'):
+        #     queries.append(current_query)
+        #     current_query = [mysqlbinlog_out[line]]
+
+        #   # Do they use this?
+
+        elif line.startswith('DELETE'):
+
+          # DELETE FROM `zabbix`.`applications`
+          # WHERE
+          #   @1 = 451 / * LONGINT meta = 0 nullable = 0 is_null = 0 * /
+          #   @2 = 10098 / * LONGINT meta = 0 nullable = 0 is_null = 0 * /
+          #   @3 = 'NNTP service' / * VARSTRING(765) meta = 765 nullable = 0 is_null = 0 * /
+          #   @4 = 0 / * INT meta = 0 nullable = 0 is_null = 0 * /
+
+            queries.append(current_query)
+            current_query = [mysqlbinlog_out[line]]
+#         elif mysqlbinlog_out[line].startswith('CALL'):
+
+#             queries.append(current_query)
+#             current_query = [mysqlbinlog_out[line]]
+
+# # Do they use this?
+
+#         elif mysqlbinlog_out[line].startswith('SELECT'):
+
+#             queries.append(current_query)
+#             current_query = [mysqlbinlog_out[line]]
+#         elif mysqlbinlog_out[line].startswith('LOAD DATA'):
+
+#             queries.append(current_query)
+#             current_query = [mysqlbinlog_out[line]]
+
+# # Do they use this?
+
+        else:
+            current_query.append(mysqlbinlog_out[line])
+
+    queries.pop(0)
+
+    for query in queries:
+        print(repr(" ".join(query))
+
+
+# c.execute("""SELECT spam, eggs, sausage FROM breakfast
+#           WHERE price < %s""", (max_price,))
+# c.executemany(
+#     """INSERT INTO breakfast (name, spam, eggs, sausage, price)
+#       VALUES (%s, %s, %s, %s, %s)""",
+#     [
+#         ("Spam and Sausage Lover's Plate", 5, 1, 8, 7.95),
+#         ("Not So Much Spam Plate", 3, 2, 0, 3.95),
+#         ("Don't Wany ANY SPAM! Plate", 0, 4, 3, 5.95)
+#       ])
+
+
+if __name__ == '__main__':
+    main()

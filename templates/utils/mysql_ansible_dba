@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# get current source dir, even if its hidden in links
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+newpassword="$1"
+
+function main()
+{
+
+opts="-u{{ mysql_dba_user }} -p'{{ mysql_dba_password }}'"
+
+echo "$opts"
+echo ""
+
+mysql -u{{ mysql_dba_user }} -p'{{ mysql_dba_password }}'
+
+}
+
+main
+
+
+# gdb -p $(cat /var/run/mysqld/mysqld.pid) -batch \
+#       -x /var/cache/ansible/bin/gdbscript \
+#        /dev/null 2>&1 &
+
+# mysql "$@"
+# /etc/my.cnf /etc/mysql/my.cnf /usr/etc/my.cnf ~/.my.cnf
+
+
+

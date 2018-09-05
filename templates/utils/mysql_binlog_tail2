@@ -1,0 +1,120 @@
+#!/bin/bash
+
+
+OPTS="-R "
+delay=10
+
+binlog_basename="$(mysql --batch  --skip-column-names  -e 'SELECT @@GLOBAL.log_bin_basename;')"
+
+binlog_list=$(mysql --batch  --skip-column-names  -e 'SHOW BINARY LOGS;' | cut -f1)
+
+#binlog_current="$(tail -1 ${binlog_basename}.index)"
+#extension="${binlog_current##*.}"
+
+mysql  --table   --column-names << EOSQL || { echo "couldn't run query" && exit 99; }
+
+show variables like 'binlog_rows_query_log_events';
+
+select variable_value as "BINARY LOG FORMAT (binlog_format) :: "
+from information_schema.global_variables where variable_name='binlog_format';
+
+select variable_value as "BINARY LOG FORMAT (log-bin) :: "
+from information_schema.global_variables where variable_name='log-bin';
+
+SHOW BINARY LOGS;
+
+select variable_value as "BINARY LOG FORMAT (sync_binlog) :: "
+from information_schema.global_variables where variable_name='sync_binlog';
+
+-- SET SESSION binlog_format=MIXED;
+
+select variable_value as "BINARY log event FORMAT (binlog_rows_query_log_events) :: "
+from information_schema.global_variables where variable_name='binlog_rows_query_log_events';
+
+EOSQL
+
+    # --database=name
+    #  --short-form
+    # --stop-never - mariadb 10.2
+    # binlog_rows_query_log_events
+    # binlog_row_image=image_type
+
+main()
+{
+
+  while true ; do
+
+    START_TIME="$(date +"%Y-%m-%d %H:%M:%S" --date="${delay} seconds ago")"
+    STOP_TIME="$(date +"%Y-%m-%d %H:%M:%S")"
+    echo $binlog_list
+
+    mysqlbinlog $OPTS \
+              --base64-output=decode-rows \
+                  -vv \
+              --start-datetime="${START_TIME}"  \
+              --stop-datetime="${STOP_TIME}" \
+                $binlog_list  | egrep '^### ' | while read line; do
+
+      TABSPEC="$(echo "$line" | egrep '^### INSERT INTO ' | cut -d' ' -f4)"
+
+       [[ "$TABSPEC" ]] || \
+      {
+      TABSPEC="$(echo "$line" | egrep '^### UPDATE ' | cut -d' ' -f3)"
+
+      }
+
+
+      [[ "$TABSPEC" ]] && \
+      {
+          echo tabspec is $TABSPEC
+        mysql  --table   --column-names -e "SHOW COLUMNS FROM $TABSPEC;"
+      } || \
+      {
+          # echo no tab spec
+          :
+      }
+      echo "$line"
+
+    done
+
+  #                 | egrep '^### '
+    echo "I is sleeping"
+    sleep ${delay}
+
+
+  done
+
+}
+
+
+
+# get current source dir, even if its hidden in links
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+
+
+# # read the options
+# TEMP=`getopt -o a::bc: --long arga::,argb,argc: -n 'test.sh' -- "$@"`
+# eval set -- "$TEMP"
+
+# extract options and their arguments into variables.
+# while true ; do
+#     case "$1" in
+#         -s|--start-datetime)
+#             case "$2" in
+#                 "") ARG_A='some default value' ; shift 2 ;;
+#                 *) ARG_A=$2 ; shift 2 ;;
+#             esac ;;
+#         -e|--stop-datetime) ARG_B=1 ; shift ;;
+#         --) shift ; break ;;
+#         *) echo "Internal error!" ; exit 1 ;;
+#     esac
+# done
+
+main

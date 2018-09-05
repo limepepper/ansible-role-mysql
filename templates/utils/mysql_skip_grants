@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# get current source dir, even if its hidden in links
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+newpassword="$1"
+
+function main()
+{
+
+service {{ mysql_service_name }} stop
+
+# kill `cat /mysql-data-directory/host_name.pid`
+
+opts='--protocol=SOCKET '
+
+su mysql -c "mysqld --skip-grant-tables 2>&1 & >> /tmp/mysql-skip.log ;  \
+echo $! > /tmp/mysqld.pid"
+
+PID="$(cat /tmp/mysqld.pid)"
+
+
+{% if mysql_requested_version|version_compare('5.6.6', '>=', strict=True) %}
+mysql $opts  << EOSQL || { echo "couldn't run query 'unexpire'" && exit 99; }
+UPDATE mysql.user
+  SET Password_expired='N'
+  WHERE User='root';
+EOSQL
+{% endif %}
+
+{% if mysql_requested_version|version_compare('5.7.6', '>=', strict=True) %}
+mysql $opts  << EOSQL || { echo "couldn't run query 'alter user root'" && exit 99; }
+ALTER USER 'root'@'localhost' IDENTIFIED BY '$newpassword';
+EOSQL
+{% else %}
+mysql $opts  << EOSQL || { echo "couldn't run query 'set pass old style'" && exit 99; }
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$newpassword');
+EOSQL
+{% endif %}
+
+mysql $opts << EOSQL || { echo "couldn't run query 'flush privileges'" && exit 99; }
+flush privileges;
+EOSQL
+
+kill $(cat /tmp/mysqld.pid)
+
+service {{ mysql_service_name }} start
+}
+
+
+main
+
+
+# gdb -p $(cat /var/run/mysqld/mysqld.pid) -batch \
+#       -x /var/cache/ansible/bin/gdbscript \
+#        /dev/null 2>&1 &
+
+# mysql "$@"
+# /etc/my.cnf /etc/mysql/my.cnf /usr/etc/my.cnf ~/.my.cnf
+
+
+
