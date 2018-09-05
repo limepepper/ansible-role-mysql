@@ -1,0 +1,30 @@
+---
+
+- become: yes
+  tags: [ mysql ]
+  block:
+
+
+  - name: tools for mysql
+    template:
+      src: "utils/{{ item }}"
+      dest: "/usr/local/bin/{{ item }}"
+      owner: root
+      group: root
+      mode: 0775
+    with_items:
+      # - mysql_report
+      - mysql_report_vars
+      - mysql_recurse_config
+      - mysql_platform_detect
+      # - mysql_root_override
+      - mysql_ansible_dba
+      # - mysql_skip_grants
+      - mysql_blat
+      # - mysql_binlog_summarize
+      # - mysql_binlog_report
+      # - mysql_binlog_tail
+      # - mysql_binlog_tail2
+      # - mysql_report
+    when: mysql_install_troubleshooting_tools is defined
+    tags: [ tools, reports, mysql-utils ]

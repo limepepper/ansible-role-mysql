@@ -1,0 +1,34 @@
+---
+
+  #https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
+
+
+  - name: install Mysql related packages
+    action: >
+      {{ ansible_pkg_mgr }} name={{ item }} state=present
+    with_items:
+      - "{{ mysql_python_package }}"
+      - "{{ mysql_base_package }}"
+      - "{{ mysql_server_package }}"
+      - gdb
+    become: true
+
+  # the first time we get here, we should be able to reset the password
+  # as it should be blank
+  # if the user is a auth_socket, then this password won't be useful, but
+  # mainly this is to pass the mysql hardening baseline profile
+  - name: Randomize Root password from blank.
+    mysql_user:
+      name: root
+      password: "{{ mysql_root_password }}"
+      state: present
+      host_all: yes
+
+  # if we are running <5.7 probably need local root password cache
+  - name: ensure .my.cnf file with root password credentials is installed
+    template:
+      src: client.cnf
+      dest: /root/.my.cnf
+      owner: root
+      group: root
+      mode: 0600

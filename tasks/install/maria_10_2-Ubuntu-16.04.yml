@@ -1,0 +1,78 @@
+---
+
+- become: yes
+  tags: [ maria, mysql, ubuntu ]
+  block:
+
+  - include_tasks: trouble-tools.yml
+
+  - apt:
+      name: software-properties-common
+
+  - name: Add an Apt signing key for keyserver.ubuntu.com
+    apt_key:
+      keyserver: keyserver.ubuntu.com
+      id: "0xF1656F24C74CD1D8"
+      # id: 0xcbcb082a1bb943db
+
+  # Add specified repository into sources list.
+  - apt_repository:
+      repo: "{{ mysql_apt_repo }}"
+      state: present
+      filename: 'MariaDB'
+
+  - name: create the  /etc/mysql config dir
+    file:
+      path:  "{{ mysql_config_dir }}"
+      state: directory
+
+  - name: generate the init.sql which runs on every server start
+    template:
+      src: "{{ item }}"
+      dest: "{{ mysql_config_dir }}/mysql_init.sql"
+      owner: root
+      group: root
+      # owner: "{{ mysql_user }}"
+      # group: "{{ mysql_group }}"
+      mode: 0664
+    with_first_found:
+    - files:
+      - "init_files/{{ mysql_fork }}-{{ mysql_requested_version|string|replace('.','') }}.sql"
+      - "templates/configs/init_sql.sql"
+    when: mysql_handle_setup_with_init_sql
+    tags: [ config ]
+    register: init_sql_updated
+    notify:
+      - restart mysql
+
+  - name: create the  /etc/mysql config dir
+    file:
+      path: /etc/mysql/mariadb.conf.d
+      state: directory
+
+  - name: config stuff
+    template:
+      src: configs/mariadb-10-2.cnf
+      dest: /etc/mysql/mariadb.conf.d/mariadb-10-2.cnf
+      owner: root
+      group: root
+      mode: 0664
+    tags: [ config ]
+    notify:
+      - restart mysql
+
+    # Ubuntu packagers seem to start the service upon installation...
+    # so this happens after installing the config files
+  - name: install mysql_package
+    package:
+      name: "{{ mysql_packages }}"
+    register: mysql_package_installed
+    tags:
+        - packages
+
+  - name: "starting the mysql: {{ mysql_service_name }} service"
+    service:
+      name: mariadb
+      state: started
+      enabled: yes
+    register: mysql_service_command_result

@@ -1,0 +1,23 @@
+---
+
+- set_fact:
+    mysql_packages: "{{ mysql_profiles[mysql_profile].packages }}"
+    mysql_service_name: "{{ mysql_profiles[mysql_profile].service_name }}"
+    mysql_mysqld_binary: "{{ mysql_profiles[mysql_profile].mysqld_binary }}"
+    mysql_config_dropin: "{{ mysql_profiles[mysql_profile].config_dropin }}"
+    mysql_requested_version: "{{ mysql_profiles[mysql_profile].requested_version }}"
+    mysql_home_dir: /var/lib/mysql
+    mysql_config_dir: /etc/mysql
+
+- set_fact:
+    mysql_external_repo: "{{ mysql_profiles[mysql_profile].external_repo }}"
+  when: mysql_profiles[mysql_profile].external_repo is defined
+
+- name: install Mysql related packages
+  action: >
+    {{ ansible_pkg_mgr }} name={{ mysql_external_repo }} state=present
+  when: mysql_external_repo is defined
+
+- file:
+    name: "/var/cache/ansible/bin"
+    state: directory

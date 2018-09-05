@@ -1,0 +1,32 @@
+---
+
+- name: linux generic main block
+  become: yes
+  become_user: root
+  tags: [ debug, tools ]
+  block:
+
+  - debug:
+      msg: "item {{ role_path }} has uuid {{ ansible_os_family }}"
+
+  - name: install Mysql related packages
+    action: >
+      {{ ansible_pkg_mgr }} name={{ item }} state=present
+    with_items:
+      - "{{ mysql_python_package }}"
+      - "{{ mysql_base_package }}"
+      - "{{ mysql_server_package }}"
+    become: true
+
+#dnf install https://dev.mysql.com/get/mysql57-community-release-fc27-10.noarch.rpm
+## CentOS 7 and Red Hat (RHEL) 7 ##
+#yum localinstall https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
+
+## CentOS 6 and Red Hat (RHEL) 6 ##
+#yum localinstall https://dev.mysql.com/get/mysql57-community-release-el6-11.noarch.rpm
+
+# dnf --enablerepo=mysql80-community install mysql-community-server
+
+# grep 'A temporary password is generated for root@localhost' /var/log/mysqld.log |tail -1
+
+#-A INPUT -m state --state NEW -m tcp -p tcp --dport 3306 -j ACCEPT

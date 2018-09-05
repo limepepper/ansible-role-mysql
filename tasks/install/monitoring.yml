@@ -1,0 +1,13 @@
+---
+
+- set_fact:
+    mysql_monitoring_packages:
+      - innotop
+
+- name: install mysql monitoring Packages
+  action: >
+    {{ ansible_pkg_mgr }} name={{ item }} state=present
+  with_flattened:
+    - "{{ mysql_monitoring_packages }}"
+  tags:
+    - pkgs
