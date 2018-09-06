@@ -9,18 +9,18 @@
   - apt:
       name: software-properties-common
 
-  - name: Add an Apt signing key for keyserver.ubuntu.com
-    apt_key:
-      keyserver: keyserver.ubuntu.com
-      id: "0xF1656F24C74CD1D8"
-      # id: 0xcbcb082a1bb943db
+  # - name: Add an Apt signing key for keyserver.ubuntu.com
+  #   apt_key:
+  #     keyserver: keyserver.ubuntu.com
+  #     id: "0xF1656F24C74CD1D8"
+  #     # id: 0xcbcb082a1bb943db
 
-  # Add specified repository into sources list.
-  - apt_repository:
-      repo: "{{ mysql_apt_repo }}"
-      state: present
-      filename: 'MariaDB'
-    when: mysql_apt_repo is defined
+  # # Add specified repository into sources list.
+  # - apt_repository:
+  #     repo: "{{ mysql_apt_repo }}"
+  #     state: present
+  #     filename: 'MariaDB'
+  #   when: mysql_apt_repo is defined
 
     # Ubuntu packagers seem to start the service upon installation...
     # so this happens after installing the config files
@@ -33,7 +33,7 @@
 
   - name: generate the init.sql which runs on every server start
     template:
-      src: "configs/init_sql-maria-10-1.sql"
+      src: "configs/init_sql-mysql_community_5_7.sql"
       dest: "{{ mysql_config_dir }}/init_sql.sql"
       owner: root
       group: root
@@ -46,11 +46,12 @@
 
   - name: config stuff
     template:
-      src: configs/mariadb-10-1.cnf
-      dest: "{{ mysql_config_dropin }}/mariadb-10-1.cnf"
+      src: configs/mysql_community_5_7.cnf
+      dest: "{{ mysql_config_dropin }}/ansible-configured.cnf"
       owner: root
       group: root
       mode: 0664
+      # backup: yes
     tags: [ config ]
     notify:
       - restart mysql
