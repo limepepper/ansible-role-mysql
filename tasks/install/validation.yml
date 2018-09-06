@@ -1,0 +1,69 @@
+---
+
+- tags: [ mysql ]
+  block:
+
+    - name: run a test mysql query
+      shell:
+        cmd: |
+
+          echo $0
+          echo $1
+
+          mysql --verbose mysql -e "SELECT 1 FROM DUAL;"
+
+          echo "validation plugin status  (INFORMATION_SCHEMA.PLUGINS)"
+
+          mysql  --table   --column-names << EOSQL || { echo "couldn't run query" && exit 99; }
+          SELECT PLUGIN_NAME, PLUGIN_STATUS, PLUGIN_TYPE        FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_TYPE = 'VALIDATE PASSWORD'    ;
+          EOSQL
+
+          echo ""
+          echo "validation plugin status  (mysql.plugin table)"
+
+          mysql  --table   --column-names << EOSQL || { echo "couldn't run query" && exit 99; }
+          SELECT
+              name,
+              dl
+          FROM
+              mysql.plugin
+          WHERE name = 'validate_password'
+          AND dl = 'validate_password.so';
+
+          EOSQL
+
+      register: test_output
+      changed_when: False
+      tags: [ tests ]
+
+    - name: import stored procedures to allow disabling password validation
+      shell:
+        cmd: |
+
+          mysql  --table   --column-names << EOSQL || { echo "couldn't run query" && exit 99; }
+
+          SET @@SESSION.SQL_LOG_BIN=0;
+
+          DROP PROCEDURE IF EXISTS mysql.remove_validate_password_plugin;
+
+          delimiter %%%
+          CREATE PROCEDURE mysql.remove_validate_password_plugin
+              () DETERMINISTIC CONTAINS SQL
+              BEGIN
+              DECLARE CheckExists int;
+              SET CheckExists = 0;
+              SELECT count(*) INTO CheckExists FROM INFORMATION_SCHEMA.PLUGINS
+              WHERE PLUGIN_NAME = 'validate_password' AND
+          PLUGIN_TYPE = 'VALIDATE PASSWORD'  AND PLUGIN_STATUS = 'ACTIVE';
+              IF (CheckExists > 0) THEN
+              UNINSTALL PLUGIN validate_password;
+                  END IF;
+              END;
+          %%%
+          delimiter ;
+
+
+          EOSQL
+      register: stuff
+      changed_when: False
+      tags: [ procs ]
