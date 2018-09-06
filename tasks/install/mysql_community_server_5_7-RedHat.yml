@@ -52,7 +52,7 @@
       owner: root
       group: root
       mode: 0664
-      backup: yes
+      # backup: yes
     tags: [ config ]
     notify:
       - restart mysql

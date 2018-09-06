@@ -36,8 +36,8 @@ verifier:
   # sudo_command: sudo -i -E
   # sudo_options: -i -E
   format: documentation
-  inspec_tests:
-    - tests/integration/inspec
+  # inspec_tests:
+  #   - tests/integration/inspec
     # - https://github.com/dev-sec/mysql-baseline
   attributes:
     # Password: A3C1ef13^N9fef

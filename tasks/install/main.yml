@@ -31,3 +31,5 @@
       name: "{{ mysql_service_name }}"
       state: started
       enabled: yes
+
+  - include_tasks: validation.yml
