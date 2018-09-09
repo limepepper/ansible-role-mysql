@@ -1,0 +1,123 @@
+---
+
+- name: Debian distro main block
+  become: yes
+  become_user: root
+  tags: [ centos ]
+  block:
+
+  - set_fact:
+      mysql_ver: "{{ mysql_profiles[mysql_profile] }}"
+    tags: always
+
+  # troubleshooing tools for mysql
+
+  - name: utilties
+    template:
+      src: "utils/{{ item }}"
+      dest: "/usr/local/bin/{{ item }}"
+      owner: root
+      group: root
+      mode: 0755
+    with_items:
+      - mysql_blat
+      - mysql_report
+      - mysql_report_vars
+      - mysql_platform_detect
+      - mysql_root_override
+    when: mysql_install_troubleshooting_tools is defined
+    tags: [ tools, reports ]
+
+  #https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
+
+  - name: install mysql_package
+    package:
+      name: "{{ mysql_packages }}"
+    register: mysql_package_installed
+    tags:
+        - packages
+
+  # the first time we get here, we should be able to reset the password
+  # as it should be blank
+  # if the user is a auth_socket, then this password won't be useful, but
+  # mainly this is to pass the mysql hardening baseline profile
+  - name: Randomize Root password from blank.
+    mysql_user:
+      name: root
+      password: "{{ mysql_root_password }}"
+      state: present
+      host_all: yes
+
+  - name: "starting the mysql: {{ mysql_service_name }} service"
+    service:
+      name: "{{ mysql_service_name }}"
+      state: started
+      enabled: yes
+    register: mysql_service_command_result
+
+  - name: run a test mysql query
+    shell:
+      cmd: |
+
+        echo $0
+        echo $1
+
+        mysql --verbose mysql -e "SELECT 1 FROM DUAL;"
+
+        echo "validation plugin status  (INFORMATION_SCHEMA.PLUGINS)"
+
+        mysql  --table   --column-names << EOSQL || { echo "couldn't run query" && exit 99; }
+        SELECT PLUGIN_NAME, PLUGIN_STATUS, PLUGIN_TYPE        FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_TYPE = 'VALIDATE PASSWORD'    ;
+        EOSQL
+
+        echo ""
+        echo "validation plugin status  (mysql.plugin table)"
+
+        mysql  --table   --column-names << EOSQL || { echo "couldn't run query" && exit 99; }
+        SELECT
+            name,
+            dl
+        FROM
+            mysql.plugin
+        WHERE name = 'validate_password'
+        AND dl = 'validate_password.so';
+
+        EOSQL
+
+    register: stuff
+    always_run: True
+    changed_when: False
+    tags: [ tests ]
+
+  - name: import stored procedures to allow disabling password validation
+    shell:
+      cmd: |
+
+        mysql  --table   --column-names << EOSQL || { echo "couldn't run query" && exit 99; }
+
+        SET @@SESSION.SQL_LOG_BIN=0;
+
+        DROP PROCEDURE IF EXISTS mysql.remove_validate_password_plugin;
+
+        delimiter %%%
+        CREATE PROCEDURE mysql.remove_validate_password_plugin
+            () DETERMINISTIC CONTAINS SQL
+            BEGIN
+            DECLARE CheckExists int;
+            SET CheckExists = 0;
+            SELECT count(*) INTO CheckExists FROM INFORMATION_SCHEMA.PLUGINS
+            WHERE PLUGIN_NAME = 'validate_password' AND
+        PLUGIN_TYPE = 'VALIDATE PASSWORD'  AND PLUGIN_STATUS = 'ACTIVE';
+            IF (CheckExists > 0) THEN
+            UNINSTALL PLUGIN validate_password;
+                END IF;
+            END;
+        %%%
+        delimiter ;
+
+
+        EOSQL
+    register: stuff
+    always_run: True
+    changed_when: False
+    tags: [ procs ]

@@ -10,50 +10,74 @@
   become: yes
   block:
 
-    # boilerplate
-  - include_tasks: bootstrap/distro-vars-import-profile2.yml
-    tags: always
+      # boilerplate
+    - include_tasks: bootstrap/distro-vars-import-profile2.yml
+      tags: always
 
-    ## START OF MAIN TASKS SECTION ##
-  - debug:
-      msg: |
-        {{ store_path }}/{{ inventory_hostname }}/mysql/root_pass
-        {{ mysql_root_password | default('not defined') }}
+      ## START OF MAIN TASKS SECTION ##
+    - debug:
+        msg: |
+          {{ store_path }}/{{ inventory_hostname }}/mysql/root_pass
+          {{ mysql_root_password | default('not defined') }}
 
-  - name: generate/retrieve the password for mysql root user
-    set_fact:
-      mysql_root_password: "{{ lookup('complex_password',
-      '{{ store_path }}/{{ inventory_hostname }}/mysql/root_pass length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
-    when: mysql_root_password is not defined
-    # if the password was generated, we will need to restart mysql service
-    # immediately to force mysql to pick it up
-    register: mysql_root_password_generated
-    tags: always
+    - name: generate/retrieve the password for mysql root user
+      set_fact:
+        mysql_root_password: "{{ lookup('complex_password',
+        '{{ store_path }}/{{ inventory_hostname }}/mysql/root_pass length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
+      when: mysql_root_password is not defined
+      # if the password was generated, we will need to restart mysql service
+      # immediately to force mysql to pick it up
+      register: mysql_root_password_generated
+      tags: always
 
-  - debug:
-      msg: |
-        {{ store_path }}/{{ inventory_hostname }}/mysql/root_pass
-        {% if (store_path + '/' + inventory_hostname + '/mysql/root_pass') is file %}
-        {{ lookup('file', store_path + '/' + inventory_hostname + '/mysql/root_pass') }}
-        {% else %}
-        mysql password was provided as extra vars
-        {% endif %}
+    - debug:
+        msg: |
+          {{ store_path }}/{{ inventory_hostname }}/mysql/root_pass
+          {% if (store_path + '/' + inventory_hostname + '/mysql/root_pass') is file %}
+          {{ lookup('file', store_path + '/' + inventory_hostname + '/mysql/root_pass') }}
+          {% else %}
+          mysql password was provided as extra vars
+          {% endif %}
 
-  - name: generate/retrieve the password for ansible_dba
-    set_fact:
-      mysql_dba_password: "{{ lookup('complex_password',
-      '{{ store_path }}/{{ inventory_hostname }}/mysql/mysql_dba_password length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
-    when: mysql_dba_password is not defined
-    # tags: always
+    - name: generate/retrieve the password for ansible_dba
+      set_fact:
+        mysql_dba_password: "{{ lookup('complex_password',
+        '{{ store_path }}/{{ inventory_hostname }}/mysql/mysql_dba_password length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
+      when: mysql_dba_password is not defined
+      # tags: always
 
-    # setup the root user
-  - name: call tasks to setup root user local credentials
-    include_tasks: opt/configure/root.yml
-    # tags: always
+      # setup the root user
+    - name: call tasks to setup root user local credentials
+      include_tasks: opt/configure/root.yml
+      # tags: always
 
-  - name: include the main mysql installation tasks
-    include_tasks: install/main.yml
-    when: mysql_install
-    tags: always
+    - name: include the main mysql installation tasks
+      include_tasks: install/main.yml
+      when: mysql_install
+      tags: always
 
-    ## END OF MAIN TASKS SECTION ##
+      ## END OF MAIN TASKS SECTION ##
+
+    - name: Show information for this installation
+      debug:
+        msg: |
+
+            #   __  __      ___  ___  _      ___         _
+            #  |  \/  |_  _/ __|/ _ \| |    | __|_ _  __| |
+            #  | |\/| | || \__ \ (_) | |__  | _|| ' \/ _` |
+            #  |_|  |_|\_, |___/\__\_\____| |___|_||_\__,_|
+            #          |__/
+
+            {% if mysql_profile is defined %}
+            mysql_profile:        {{ mysql_profile }}
+            {% endif %}
+            {% if rprofile is defined %}
+            rprofile:             {{ rprofile }}
+            {% endif %}
+
+            Server Name:          "{{ ansible_hostname }}"
+            Server Fqdn:          "{{ ansible_fqdn }}"
+            Inventory Hostname:   "{{ inventory_hostname }}"
+
+            default_ipv4:         {% if ansible_default_ipv4 is defined and 'address' in ansible_default_ipv4 %}{{ ansible_default_ipv4.address }}{% else %}<undefined>{% endif %}
+            default ipv6:         {% if ansible_default_ipv6 is defined and 'address' in ansible_default_ipv6 %}{{ ansible_default_ipv6.address }}{% else %}<undefined>{% endif %}

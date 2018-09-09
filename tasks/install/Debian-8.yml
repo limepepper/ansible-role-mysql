@@ -1,0 +1,47 @@
+---
+
+# main jessie repos have
+# mysql-server-5.5  5.5.59-0  from repos
+# maria 10.0.32
+
+- name: install Mysql related packages
+  action: >
+    {{ ansible_pkg_mgr }} name={{ item }} state=present
+  with_items:
+    - "{{ mysql_python_package }}"
+    - "{{ mysql_base_package }}"
+    - "{{ mysql_server_package }}"
+    - gdb
+  become: true
+
+# the first time we get here, we should be able to reset the password
+# as it should be blank
+# if the user is a auth_socket, then this password won't be useful, but
+# mainly this is to pass the mysql hardening baseline profile
+- name: Randomize Root password from blank.
+  mysql_user:
+    name: root
+    password: "{{ mysql_root_password }}"
+    state: present
+    host_all: yes
+
+# if we are running <5.7 probably need local root password cache
+- name: ensure .my.cnf file with root password credentials is installed
+  template:
+    src: client.cnf
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: 0600
+
+# MariaDB 10.0 is a previous stable series of MariaDB. It is an evolution of MariaDB 5.5 with several entirely new features not found anywhere else and with backported and reimplemented features from MySQL 5.6.
+
+# https://downloads.mariadb.com/MariaDB/mariadb-10.2.13/repo/debian/mariadb-10.2.13-debian-jessie-amd64-debs.tar
+
+
+# https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY
+# https://downloads.mariadb.com/MaxScale/MariaDB-MaxScale-GPG-KEY
+# https://downloads.mariadb.com/Tools/MariaDB-Enterprise-GPG-KEY
+
+#https://mariadb.com/kb/en/library/mariadb-package-repository-setup-and-usage/
+#curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
