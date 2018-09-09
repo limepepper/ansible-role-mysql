@@ -1,30 +1,26 @@
 ---
 
+# boilerplate
+- name: bootstrap enough that ansible can run most ansible modules
+  include_tasks: "bootstrap/main.yml"
+  when: bootstrap_done is not defined
+  tags: [ bootstrap ]
+
 - tags: [ mysql ]
   become: yes
   block:
-
-    # boilerplate
-  - name: bootstrap enough that ansible can run most ansible modules
-    include_tasks: "bootstrap/main.yml"
-    when: bootstrap_done is not defined
-    tags: [ bootstrap ]
 
     # boilerplate
   - include_tasks: bootstrap/distro-vars-import-profile2.yml
     tags: always
 
     ## START OF MAIN TASKS SECTION ##
-
-  - debug:
-      var: mysql_root_password
-
   - debug:
       msg: |
         {{ store_path }}/{{ inventory_hostname }}/mysql/root_pass
         {{ mysql_root_password | default('not defined') }}
 
-  - name: generate a complex password for root
+  - name: generate/retrieve the password for mysql root user
     set_fact:
       mysql_root_password: "{{ lookup('complex_password',
       '{{ store_path }}/{{ inventory_hostname }}/mysql/root_pass length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
@@ -37,33 +33,27 @@
   - debug:
       msg: |
         {{ store_path }}/{{ inventory_hostname }}/mysql/root_pass
+        {% if (store_path + '/' + inventory_hostname + '/mysql/root_pass') is file %}
         {{ lookup('file', store_path + '/' + inventory_hostname + '/mysql/root_pass') }}
+        {% else %}
+        mysql password was provided as extra vars
+        {% endif %}
 
-  - name: generate a complex password for ansible_dba
+  - name: generate/retrieve the password for ansible_dba
     set_fact:
       mysql_dba_password: "{{ lookup('complex_password',
       '{{ store_path }}/{{ inventory_hostname }}/mysql/mysql_dba_password length=15 chars=ascii_lowercase,ascii_uppercase,digits,#][()<>?@£~:;') }}"
     when: mysql_dba_password is not defined
-    tags: always
-
-  - name: need to persist the mysql_dba_user value for tests
-    set_fact:
-      mysql_dba_user: "{{ mysql_dba_user }}"
-    tags: always
+    # tags: always
 
     # setup the root user
-  - include_tasks: opt/configure/root.yml
-    tags: always
+  - name: call tasks to setup root user local credentials
+    include_tasks: opt/configure/root.yml
+    # tags: always
 
-  - debug:
-      var: mysql_install
-
-  - include_tasks: install/main.yml
+  - name: include the main mysql installation tasks
+    include_tasks: install/main.yml
     when: mysql_install
     tags: always
 
-  - debug:
-      var: limepepper_mysql
-
     ## END OF MAIN TASKS SECTION ##
-

@@ -163,7 +163,6 @@
       mode: 0775
     when: mysql_running_baseline
 
-      # is this a good idea, I think it will fuck up gem
   - name: Force upgrade of pip on CentOS-6
     pip:
       name: pip

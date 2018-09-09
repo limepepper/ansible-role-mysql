@@ -5,10 +5,7 @@
 # mysql_server_package: mysql-server
 
 mysql_profile: maria_server_10_1
-mysql_root_user: root
 com_repo_ver: 11
-
-mysql_db_name: mysql
 
 mysql_config_path: /etc/mysql
 mysql_config_file: my.cnf
