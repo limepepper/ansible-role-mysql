@@ -1,6 +1,6 @@
 #
 #
-cookbook = ENV['COOKBOOK']
+# cookbook = ENV['COOKBOOK']
 
 task default: [:test]
 
@@ -35,14 +35,14 @@ end
 desc 'Build VM with cookbook'
 task :create do
   puts 'run kitchen task create'
-  sh 'KITCHEN_LOCAL_YAML=.kitchen.digitalocean.yml bundle exec '\
-          "kitchen create #{ENV['suite']}-#{ENV['platform']}"
+  sh 'ANSIBLE_Vs=vvv KITCHEN_LOCAL_YAML=.kitchen.digitalocean.yml bundle exec '\
+          "kitchen create #{ENV['suite']}-#{ENV['platform']} --log-level DEBUG"
 end
 
 desc 'Converge VM with cookbook'
 task :converge do
   puts 'run kitchen tasks'
-  sh 'KITCHEN_LOCAL_YAML=.kitchen.digitalocean.yml bundle exec '\
+  sh 'ANSIBLE_Vs=vvv KITCHEN_LOCAL_YAML=.kitchen.digitalocean.yml bundle exec '\
           "kitchen converge #{ENV['suite']}-#{ENV['platform']}"
 end
 

@@ -9,8 +9,11 @@ driver:
   tags: do_test_pool
   firewalls: bca4bb7a-bd17-467c-8a53-358b8368f371
 
+# transport:
+#   ssh_key: /home/tomhodder/.ssh/id_rsa_digitalocean
+
 transport:
-  ssh_key: /home/tomhodder/.ssh/id_rsa_digitalocean
+  ssh_key: ~/.ssh/id_rsa.do-buildbot
 
 # verifier:
 #   format: junit
