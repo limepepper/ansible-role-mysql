@@ -24,6 +24,9 @@
         - nmap
         - jq
         - inotify-tools
+        - file
+        - net-tools
+        - iproute
 
   # update the mlocate database in the background
   - name: update the mlocate database

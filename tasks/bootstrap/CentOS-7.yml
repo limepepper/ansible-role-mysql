@@ -36,4 +36,7 @@
         cmd: |
           systemd-tmpfiles --create --prefix /var/log/journal
           systemctl restart systemd-journald
-      when: journal_created.changed
+      when:
+        - journal_created.changed
+        - 'ansible_virtualization_type != "docker"'
+

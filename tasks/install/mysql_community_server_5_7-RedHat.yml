@@ -21,6 +21,10 @@
       state: directory
     tags: always
 
+  - file:
+      path: /var/log/mysql
+      state: directory
+
   # work-around as it doesn't seem to load the files in /etc/my.cnf.d
   - name: "ensure !includedir {{ mysql_config_dropin }}"
     lineinfile:

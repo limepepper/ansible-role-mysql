@@ -1,21 +1,30 @@
 ---
 
+
+- name: "Configuring zabbix selinux for {{ inventory_hostname }}"
+  debug:
+    msg: |
+          {{ ansible_os_family }}
+          {{ ansible_selinux }}
+          {{ ansible_selinux.status }}
+          {{ "ansible_selinux.status == 'enabled'" }}
+
 - tags: [ selinux ]
   become: yes
   when:
     - "ansible_os_family == 'RedHat'"
     - ansible_selinux is defined
     - ansible_selinux.status is defined
-    - "ansible_selinux.status != 'disabled'"
+    - "ansible_selinux.status == 'enabled'"
   block:
 
     - name: "Configuring zabbix selinux for {{ inventory_hostname }}"
       debug:
         msg: |
               - "ansible_os_family == 'RedHat'"
-              - ansible_selinux is defined
-              - ansible_selinux.status is defined
-              - "ansible_selinux.status != 'disabled'"
+              {{ ansible_selinux }}
+              {{ ansible_selinux.status }}
+              {{ "ansible_selinux.status == 'enabled'" }}
 
     - name: install packages required for policy editing
       package:
