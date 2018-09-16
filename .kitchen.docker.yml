@@ -1,0 +1,54 @@
+---
+
+driver:
+  name: docker
+  socket: tcp://docker:2376
+  privileged: true
+  publish_all: yes
+
+provisioner:
+  idempotency_test: false
+
+platforms:
+#   - name: debian-8
+  - name: debian-9
+    driver_config:
+      run_command: /lib/systemd/systemd
+      volume:
+        - /sys/fs/cgroup:/sys/fs/cgroup:ro
+        - /var/lib/docker
+      platform: debian
+  - name: ubuntu-18
+    driver_config:
+      image: geerlingguy/docker-ubuntu1804-ansible:latest
+      run_command: /lib/systemd/systemd
+      volume:
+        - /sys/fs/cgroup:/sys/fs/cgroup:ro
+        - /var/lib/docker
+      platform: ubuntu
+  - name: ubuntu-16.04
+    driver_config:
+      image: geerlingguy/docker-ubuntu1604-ansible:latest
+      run_command: /lib/systemd/systemd
+      volume:
+        - /sys/fs/cgroup:/sys/fs/cgroup:ro
+        - /var/lib/docker
+
+      platform: ubuntu
+      # forward:
+      #   - 22:2222
+      #   - 80:8080
+  - name: centos-7
+    driver_config:
+      # image: geerlingguy/docker-centos7-ansible:latest
+      run_command: /lib/systemd/systemd
+      volume:
+        - /sys/fs/cgroup:/sys/fs/cgroup:ro
+        # - /var/lib/docker
+
+      platform: centos
+  - name: centos-6
+    provisioner:
+      extra_vars:
+        apache_profile: rh-php70
+  - name: fedora-28

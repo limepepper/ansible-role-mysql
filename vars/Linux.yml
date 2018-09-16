@@ -1,0 +1,9 @@
+---
+
+mysql_root_user: root
+mysql_dba_user: ansible_dba
+
+limepepper.mysql:
+  logfiles: {}
+
+mysql_db_name: mysql

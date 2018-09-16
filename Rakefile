@@ -21,9 +21,10 @@ end
 desc 'Run setup'
 task :setup do
   # Your code goes here
-  puts 'bundle exec stuff'
-  sh 'bundle install'
-  sh 'bundle update'
+  puts 'bundle install stuff'
+  sh 'bundle install --verbose'
+  puts 'bundle update'
+  sh 'bundle update --verbose'
 end
 
 # desc 'Foodcritic of new code'
@@ -32,30 +33,49 @@ end
 #   sh 'foodcritic . -f any'
 # end
 
+# echo some change
+
+local_file = (!ENV['local_file'].nil? && !ENV['local_file'].empty?) && ENV['local_file'] || 'digitalocean'
+platform = ENV['platform'] || 'centos-7'
+suite = ENV['suite'] || 'default'
+
 desc 'Build VM with cookbook'
 task :create do
   puts 'run kitchen task create'
-  sh 'ANSIBLE_Vs=vvv KITCHEN_LOCAL_YAML=.kitchen.digitalocean.yml bundle exec '\
-          "kitchen create #{ENV['suite']}-#{ENV['platform']} --log-level DEBUG"
+
+  puts "ENV['local_file']  = '#{ENV['local_file']}'"
+  puts "local_file  = '#{local_file}'"
+
+  puts 'ANSIBLE_Vs=vvv '\
+          "KITCHEN_LOCAL_YAML=.kitchen.#{local_file}.yml bundle exec "\
+          "kitchen create #{suite}-#{platform} --log-level DEBUG"
+
+  sh 'ANSIBLE_Vs=vvv '\
+          "KITCHEN_LOCAL_YAML=.kitchen.#{local_file}.yml bundle exec "\
+          "kitchen create #{suite}-#{platform} --log-level DEBUG"
 end
 
 desc 'Converge VM with cookbook'
 task :converge do
   puts 'run kitchen tasks'
-  sh 'ANSIBLE_Vs=vvv KITCHEN_LOCAL_YAML=.kitchen.digitalocean.yml bundle exec '\
-          "kitchen converge #{ENV['suite']}-#{ENV['platform']}"
+
+  sh 'ANSIBLE_Vs=vvv '\
+          "KITCHEN_LOCAL_YAML=.kitchen.#{local_file}.yml bundle exec "\
+          "kitchen converge #{suite}-#{platform}"
 end
 
 desc 'Build VM with cookbook'
 task :verify do
   puts 'run kitchen tasks'
-  sh 'KITCHEN_LOCAL_YAML=.kitchen.digitalocean.yml bundle exec '\
-          "kitchen verify #{ENV['suite']}-#{ENV['platform']}"
+
+  sh "KITCHEN_LOCAL_YAML=.kitchen.#{local_file}.yml bundle exec "\
+          "kitchen verify #{suite}-#{platform}"
 end
 
 desc 'Destroy VM'
 task :destroy do
   puts 'run kitchen tasks'
-  sh 'KITCHEN_LOCAL_YAML=.kitchen.digitalocean.yml bundle exec '\
-          "kitchen destroy #{ENV['suite']}-#{ENV['platform']}"
+
+  sh "KITCHEN_LOCAL_YAML=.kitchen.#{local_file}.yml bundle exec "\
+          "kitchen destroy #{suite}-#{platform}"
 end

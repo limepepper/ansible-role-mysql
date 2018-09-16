@@ -15,20 +15,23 @@ if ENV['JENKINS_HOME']
 
 elsif ENV['LOCAL_DEV']
   # gem 'inspec', path: '/home/tomhodder/git/inspec'
-  gem 'inspec'
+  gem 'inspec', '>= 2.0'
   gem 'kitchen-digitalocean', path: '/home/tomhodder/git/kitchen-digitalocean'
+  gem 'kitchen-docker'
   gem 'kitchen-inspec'
   gem 'kitchen-vagrant'
+  gem 'test-kitchen', path: '/home/tomhodder/git/test-kitchen'
 
 else
-  gem 'inspec'
+  gem 'inspec', '>= 2.0'
   gem 'kitchen-digitalocean'
+  gem 'kitchen-docker'
   gem 'kitchen-inspec'
   gem 'kitchen-vagrant'
+  gem 'test-kitchen'
 end
 
 group :testing do
   gem 'kitchen-ansiblepush'
   gem 'net-ssh'
-  gem 'test-kitchen', '~> 1.8'
 end

@@ -45,7 +45,7 @@ control 'mysql-1' do
 
   cmd_stderr = sql.query('show databases;').stderr
 
-  describe cmd_stderr.sub(/^(.+?Using a password on the command line interface can be insecure.+?\n)/, '') || cmd_stderr do # rubocop:disable LineLength
+  describe cmd_stderr.sub(/^(.+?Using a password on the command line interface can be insecure.+?\n)/, '') || cmd_stderr do
     it { should eq '' }
   end
 end
