@@ -233,12 +233,12 @@ def strip_fieldattributes(obj=""):
 
 
 def buildCombo(reponame, platforms, suites):
-    tmp = []
-    for platform in platforms:
-        for suite in suites:
-            tmp.append("{0}_{1}_{2}".format(reponame, platform, suite))
+    combos = []
+    for suite in suites:
+        for platform in platforms:
+            combos.append("{0}_{1}_{2}".format(reponame, platform, suite))
 
-    return tmp
+    return combos
 
 
 def prepend_path(paths=[], prepath=''):
