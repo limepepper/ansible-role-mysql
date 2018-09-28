@@ -22,7 +22,7 @@
         - procps
         - lsof
         - nmap
-        - jq
+        # - jq
         - inotify-tools
         - file
         - net-tools

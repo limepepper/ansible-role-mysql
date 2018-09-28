@@ -18,10 +18,9 @@
           - python-pip
           - unzip
           - git
-          # unlikely to be generally applicable, do in mysql instead
-          # - MySQL-python
           - net-tools
           - curl
+          - iproute
 
     - name: create the /var/log/journal for storing boot logs
       file:

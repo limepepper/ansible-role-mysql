@@ -1,6 +1,7 @@
 ---
 
 driver:
+  # https://github.com/test-kitchen/kitchen-docker
   name: docker
   socket: tcp://docker:2376
   privileged: true

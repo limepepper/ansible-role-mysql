@@ -39,6 +39,8 @@ local_file = (!ENV['local_file'].nil? && !ENV['local_file'].empty?) && ENV['loca
 platform = ENV['platform'] || 'centos-7'
 suite = ENV['suite'] || 'default'
 
+puts local_file
+
 desc 'Build VM with cookbook'
 task :create do
   puts 'run kitchen task create'

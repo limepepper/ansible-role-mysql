@@ -19,6 +19,7 @@
         - git
         - net-tools
         - curl
+        - wget
 
   - name: Force upgrade of pip on CentOS-6
     pip:
